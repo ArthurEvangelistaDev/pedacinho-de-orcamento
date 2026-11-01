@@ -1,0 +1,9 @@
+/work/
+**/target/
+**/.env
+**/.env.*
+*.log
+AGENTS.md.bak*
+.idea/
+*.iml
+.DS_Store
