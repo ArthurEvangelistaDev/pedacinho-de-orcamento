@@ -16,4 +16,16 @@ INS-01, INS-05 a INS-07, INS-09 a INS-14 e CON-01/CON-02, mais as convenções a
 
 Testes de domínio: validação de nome/quantidades/preço/zero e cálculo unitário. Testes HTTP/MySQL: 201/Location, IDs/decimais em strings, preço ausente e zero, GET 200/404/ID inválido, referências e formatos inválidos, campos desconhecidos, falhas sem persistência parcial e dados preservados. Schema/seed: MySQL real em banco local de testes, sem SQLite/H2.
 
-Passo 1 concluído: validate_spec.py --strict retornou 0 erros/0 avisos; check_commit.py aprovou a mensagem. Política Java explícita e decisões anteriores preservadas como histórico. Passos 2/3 pendentes. Nenhum critério funcional marcado como verificado antes do gate e da revisão independente.
+Passo 1 concluído no commit 4e565b1: validate_spec.py --strict retornou 0 erros/0 avisos; check_commit.py aprovou a mensagem. Política Java explícita e decisões anteriores preservadas como histórico.
+
+Passo 2 concluído em 2026-11-01: Maven Wrapper 3.9.16 executou verify com Spring Boot 4.1.2/JDK 25.0.5/MySQL 8.4.13. Migração V1 aplicada; 1 teste de integração passou, 0 falhas/erros/ignorados. Jar executável gerado. Nenhum servidor global alterado; MySQL de teste encerrado pelo script.
+
+| Critério do passo 2 | Evidência em backend/src/test/java/br/com/pedacinhodeorcamento/SchemaIT.java | Resultado esperado |
+| --- | --- | --- |
+| Banco isolado | linha 14, isEqualTo("pedacinho_insumos_test") | Somente base de teste |
+| Tipos iniciais | linha 15, isEqualTo(2) | Ingrediente e embalagem |
+| Unidades iniciais | linha 16, isEqualTo(5) | g/kg/ml/l/un |
+| Conversão kg | linha 17, isEqualByComparingTo("1000") | Fator base 1000 |
+| Tabelas MySQL | linha 18, isEqualTo(3) | Três tabelas em InnoDB |
+
+Cada teste do passo 2 atende aos critérios acima; nenhum teste especulativo. Passo 3 pendente. Critérios funcionais permanecem pendentes até seus testes e a revisão independente.
