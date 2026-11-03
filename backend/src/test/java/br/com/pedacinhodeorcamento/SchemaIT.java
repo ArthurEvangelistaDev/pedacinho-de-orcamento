@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties="spring.datasource.url=jdbc:mysql://127.0.0.1:33306/pedacinho_insumos_test?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true")
 class SchemaIT {
     @Autowired JdbcTemplate jdbc;
 

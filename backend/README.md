@@ -18,7 +18,7 @@ Flyway cria somente catálogos e insumos neste incremento. Hibernate valida o sc
 
 ## Verificação
 
-`./mvnw.cmd test` executa testes unitários. Com banco de teste configurado nas variáveis APP_DB_*, `./mvnw.cmd -Pmysql-integration verify` executa os testes HTTP/SQL e empacota o backend. A base de integração deve se chamar pedacinho_insumos_test; ela contém somente dados descartáveis de testes.
+`./mvnw.cmd test` executa testes unitários. Com usuário/senha de teste nas variáveis APP_DB_USER/APP_DB_PASSWORD, `./mvnw.cmd -Pmysql-integration verify` executa os testes HTTP/SQL e empacota o backend. As classes de integração fixam o destino em 127.0.0.1:33306/pedacinho_insumos_test, antes de carregar Flyway/JPA, e não usam APP_DB_URL. Essa base contém somente dados descartáveis de testes.
 
 Nesta máquina, ferramentas portáteis aprovadas ficam em work/toolchain. A partir da raiz do projeto:
 

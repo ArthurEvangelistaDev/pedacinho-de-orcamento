@@ -46,8 +46,13 @@ try {
     $testMarker = Join-Path $testStateRoot 'configured'
     if (-not (Test-Path -LiteralPath $testMarker)) {
         $testSetupSql = "ALTER USER 'root'@'localhost' IDENTIFIED BY '$testPassword'; CREATE DATABASE IF NOT EXISTS pedacinho_insumos_test CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
-        $testSetupSql | & (Join-Path $testMysqlRoot 'bin/mysql.exe') --no-defaults --protocol=tcp --host=127.0.0.1 --port=33306 --user=root --skip-password
-        if ($LASTEXITCODE -ne 0) { throw 'Isolated test database setup failed.' }
+        $testNativePreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $testSetupSql | & (Join-Path $testMysqlRoot 'bin/mysql.exe') --no-defaults --protocol=tcp --host=127.0.0.1 --port=33306 --user=root --skip-password
+            $testSetupExit = $LASTEXITCODE
+        } finally { $ErrorActionPreference = $testNativePreference }
+        if ($testSetupExit -ne 0) { throw 'Isolated test database setup failed.' }
         [IO.File]::WriteAllText($testMarker,'ready')
     }
     $env:JAVA_HOME = $testJavaRoot
@@ -57,13 +62,18 @@ try {
     $env:APP_DB_PASSWORD = $testPassword
     Push-Location (Join-Path $testProjectRoot 'backend')
     try {
+        # Windows PowerShell turns redirected native stderr warnings into ErrorRecords.
+        # Preserve the output and use Maven's exit code as the test/build gate.
+        $ErrorActionPreference = 'Continue'
         & (Join-Path $testProjectRoot 'backend/mvnw.cmd') --batch-mode --no-transfer-progress "-Dmaven.repo.local=$(Join-Path $ToolchainRoot 'm2')" -Pmysql-integration verify
         $testExit = $LASTEXITCODE
-    } finally { Pop-Location }
+    } finally { $ErrorActionPreference = 'Stop'; Pop-Location }
 } finally {
     if ($testProcess -and -not $testProcess.HasExited) {
+        $ErrorActionPreference = 'Continue'
         & (Join-Path $testMysqlRoot 'bin/mysqladmin.exe') "--defaults-extra-file=$testClientConfig" shutdown 2>$null | Out-Null
         if (-not $testProcess.WaitForExit(10000)) { Stop-Process -Id $testProcess.Id -Force }
+        $ErrorActionPreference = 'Stop'
     }
     $env:JAVA_HOME = $testPreviousJava
     $env:MAVEN_USER_HOME = $testPreviousMavenHome
